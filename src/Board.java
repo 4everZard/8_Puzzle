@@ -4,6 +4,7 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stack;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 
 
@@ -83,21 +84,37 @@ public class Board {
 		a[i] = temp;
 	}
 	
+	private int[][] to2DArray(int[] blocks){
+		int k=0;
+		int[][] blocks2 = new int[N][N];
+		for(int i=0;i<N;i++) {
+			for(int j=0;j<N;j++) {
+				blocks2[i][j] = blocks[k];
+				k++;
+			}
+		}
+		return blocks2;
+	}
+	
 	// a block obtained by exchanging two blocks
 	public Board twin() {
-		Board twinBoard;
-		 
-		twinBoard.blocks = this.blocks.clone();
+
+		int[] twinBoard = new int[N*N];
+		for(int i=0;i<N*N;i++) {
+			twinBoard[i] = this.blocks[i];
+		}
+		
 		int rand1, rand2;
 		rand1 = StdRandom.uniform(N);
 		rand2 = StdRandom.uniform(N);
-		while(twinBoard.blocks[rand1] == 0 || twinBoard.blocks[rand2] == 0) {
+		while(twinBoard[rand1] == 0 || twinBoard[rand2] == 0) {
 			rand1 = StdRandom.uniform(N);
 			rand2 = StdRandom.uniform(N);
 		}
-		exch(twinBoard.blocks,rand1,rand2);
+		exch(twinBoard,rand1,rand2);
 		
-		return twinBoard;
+		//Board(to2DArray(twinBoard));
+		return new Board(to2DArray(twinBoard));
 	}
 	
 	public boolean equals(Object y) {
@@ -112,19 +129,51 @@ public class Board {
 	
 	// all neightboring blocks
 	public Iterable<Board> neighbors(){
-		int i;
+		int i;	
 		Board neighborBoard;
-		Queue<Board> bq = new LinkedList<Board>();
+		Stack<Board> bq = new Stack<Board>();
 		
+		  /* find the 0 block */
+        for (i = 0; i < blocks.length; i++)
+            if (blocks[i] == 0) break;
+
+        /* no 0 block exists. Generally not possible */
+        if (i >= blocks.length) return null;
+        
+        /* add all possible neighbor blocks into queue */
+        if (i >= N)    {
+            /* 0 up */
+            neighborBoard = new Board(to2DArray(blocks));
+            exch(neighborBoard.blocks, i, i-N);
+            bq.push(neighborBoard);
+        }
+        if (i < blocks.length - N) {
+            /* 0 down */
+            neighborBoard = new Board(to2DArray(blocks));
+            exch(neighborBoard.blocks, i, i+N);
+            bq.push(neighborBoard);
+        }
+        if (i % N != 0) {
+            /* 0 left */
+            neighborBoard = new Board(to2DArray(blocks));
+            exch(neighborBoard.blocks, i, i-1);
+            bq.push(neighborBoard);
+        }
+        if ((i+1) % N != 0) {
+            /* 0 right */
+            neighborBoard = new Board(to2DArray(blocks));
+            exch(neighborBoard.blocks, i, i+1);
+            bq.push(neighborBoard);
+        }
+        return bq;
 	
-	
-	
+	}
 	
 	
 	
 	
 
-	}
+
 	
     public String toString() {
         StringBuilder s = new StringBuilder();
@@ -150,4 +199,3 @@ public class Board {
     }
 	
 }
-	
